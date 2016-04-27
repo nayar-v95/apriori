@@ -1,3 +1,5 @@
+"""PYTHON IMPLEMENTATION OF THE APRIORI ALGORITHM TO DETERMINE FREQUENT ITEM SETS ALONG WITH THE ASSOCIATION RULES"""
+
 import csv,itertools
 def get_1_item_count(D):
     ele_count = {}
@@ -48,36 +50,49 @@ def has_no_infrequent_subset(c,L,k):
             return False
     return True
 
-with open("database.csv") as transactions:
+with open("apriori (1).csv") as transactions:
     trans_db=list(csv.reader(transactions,delimiter=','))
-db=[]
+db=[];count={}
 for row in range(1,len(trans_db)):
     L=[]
     for item in range(0,len(trans_db[row])):
         if trans_db[row][item]=='1':
             L.append(trans_db[0][item])
     db.append(L)
-print("The transaction database is : ",db)
-minsup = int(input("Enter minimum support : "))
+print("The transaction database is : "+str(db))
+minsup = float(raw_input("Enter minimum support : "))
+minconf=float(raw_input("Enter minimum confidence : "))
 L=[]
 C=get_1_item_count(db)
-print('\nC 1 = ',sorted(C.items()))
+for i in C:
+    count[i]=C[i]
+print('\nC 1 = '+str(sorted(C.items())))
 Lk=sorted(find_frequent(C,minsup))
-print('L 1 = ',Lk)
+print('L 1 = '+str(Lk))
 L.append(Lk)
 k=1
 while Lk:
     C=apriori_gen(L[k-1],k+1)
     C=count_candidate_frequency(C,db)
     if C : 
-        print('C',k+1,'=',sorted(C.items()))
+        for i in C:
+            count[i]=C[i]
+        print('C '+str(k+1)+' = '+str(sorted(C.items())))
     Lk=sorted(list(map(sorted,find_frequent(C,minsup))))
     Lk=list(map(tuple,Lk))
     if Lk : 
-        print('L',k+1,'=',Lk)
+        print('L '+str(k+1)+' = '+str(Lk))
         L.append(Lk)
         k+=1    
-print("\nFrequent Sets : \n",L,"\n\nMaximal Frequent Set(s) : \n",L[-1])
-
-
-
+print("\nFrequent Sets : \n"+str(L)+"\n\nMaximal Frequent Set(s) : \n"+str(L[-1])+"\n")
+del(L[0])
+print "\nASSOCIATION RULES\n"
+for i in L:
+    for j in i:
+        for k in j:
+            y=tuple(set(j)-set(k))
+            conf=float(count[j])/float(count[k])
+            if conf>minconf:
+                print k+"--->"+str(y)+' with confidence of '+str(conf)
+        print ''
+    print '\n'
